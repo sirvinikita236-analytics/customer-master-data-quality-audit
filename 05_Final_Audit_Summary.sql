@@ -1,3 +1,4 @@
+
 SELECT
     'Total Source Records' AS audit_metric,
     COUNT(*) AS record_count,
