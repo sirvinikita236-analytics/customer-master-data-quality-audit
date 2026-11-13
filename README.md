@@ -172,3 +172,22 @@ Based on the audit findings, the following actions are recommended to improve cu
 6. **Ongoing Data Quality Monitoring:** Introduce regular validation checks to identify missing, inconsistent, and duplicate data at an early stage.
 
 These recommendations can help improve data reliability, reporting accuracy, and the overall management of customer information.
+
+## 10. SQL Script Execution Notes
+
+The SQL scripts are organized by project activity.
+
+- File 01: Data profiling and exploratory analysis.
+- File 02: Data standardization and related validation.
+- File 03: Earlier validation version; not part of the final execution sequence.
+- File 04: Final customer data quality exception view.
+- File 05: Final consolidated audit summary.
+
+Files 01 and 02 contain exploratory and database-modification
+statements. They should not be executed as complete scripts
+against an already populated database without checking the
+existing database objects first.
+
+For the final audit workflow, File 04 defines the exception
+view and File 05 generates the consolidated audit summary.
+The source table must already exist.
