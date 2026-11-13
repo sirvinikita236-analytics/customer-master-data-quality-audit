@@ -1,4 +1,9 @@
 
+-- ============================================================
+-- CUSTOMER MASTER DATA QUALITY AUDIT
+-- Final Exception View and Validation
+-- ============================================================
+
 CREATE OR REPLACE VIEW customer_data_quality_exceptions AS
 
 WITH cleaned AS (
@@ -24,7 +29,10 @@ WITH cleaned AS (
                 REPLACE(
                     REPLACE(
                         REPLACE(
-                            REPLACE(UPPER(TRIM(COALESCE(spend, ''))), CHAR(13), ''),
+                            REPLACE(
+                                UPPER(TRIM(COALESCE(spend, ''))),
+                                CHAR(13), ''
+                            ),
                             CHAR(0), ''
                         ),
                         'USD', ''
@@ -41,6 +49,7 @@ WITH cleaned AS (
 parsed AS (
     SELECT
         *,
+
         CASE
             WHEN date_norm IN ('', 'null', 'none', 'n/a', '-', '-999')
                 THEN NULL
@@ -54,8 +63,9 @@ parsed AS (
 
             ELSE COALESCE(
                 STR_TO_DATE(date_norm, '%b %e, %Y'),
-                STR_TO_DATE(date_norm, '%m.%d.%Y'),
+                STR_TO_DATE(date_norm, '%e %b %Y'),
                 STR_TO_DATE(date_norm, '%d.%m.%Y'),
+                STR_TO_DATE(date_norm, '%m.%d.%Y'),
                 STR_TO_DATE(date_norm, '%m/%d/%Y'),
                 STR_TO_DATE(date_norm, '%d-%b-%y'),
                 STR_TO_DATE(date_norm, '%d-%m-%Y'),
@@ -123,61 +133,29 @@ WHERE
         GROUP BY customer_id
         HAVING COUNT(*) > 1
     );
-    SELECT
+
+
+-- ============================================================
+-- VALIDATION: FINAL EXCEPTION COUNTS
+-- ============================================================
+
+SELECT
     COUNT(*) AS total_exception_records,
     SUM(missing_email_flag) AS missing_emails,
     SUM(invalid_signup_date_flag) AS invalid_dates,
     SUM(invalid_spend_flag) AS invalid_spend,
     SUM(duplicate_id_flag) AS duplicate_id_records
 FROM customer_data_quality_exceptions;
-SELECT
-    COUNT(*) AS total_exception_records,
-    SUM(missing_email_flag) AS missing_emails,
-    SUM(invalid_signup_date_flag) AS invalid_dates,
-    SUM(invalid_spend_flag) AS invalid_spend,
-    SUM(duplicate_id_flag) AS duplicate_id_records
-FROM customer_data_quality_exceptions;
-SELECT
-    'Total Source Records' AS audit_metric,
-    COUNT(*) AS record_count,
-    100.00 AS percentage
-FROM customer_data_quality_source_1000
 
-UNION ALL
+
+-- ============================================================
+-- VALIDATION: SIGNUP DATE EXCEPTIONS
+-- ============================================================
 
 SELECT
-    'Unique Exception Records',
-    COUNT(*),
-    ROUND(
-        COUNT(*) * 100.0 /
-        (SELECT COUNT(*) FROM customer_data_quality_source_1000), 2
-    )
+    customer_id,
+    signup_date,
+    parsed_signup_date,
+    invalid_signup_date_flag
 FROM customer_data_quality_exceptions
-
-UNION ALL
-
-SELECT 'Missing Emails',
-       SUM(missing_email_flag),
-       ROUND(SUM(missing_email_flag) * 100.0 / 1000, 2)
-FROM customer_data_quality_exceptions
-
-UNION ALL
-
-SELECT 'Invalid Signup Dates',
-       SUM(invalid_signup_date_flag),
-       ROUND(SUM(invalid_signup_date_flag) * 100.0 / 1000, 2)
-FROM customer_data_quality_exceptions
-
-UNION ALL
-
-SELECT 'Invalid Spend',
-       SUM(invalid_spend_flag),
-       ROUND(SUM(invalid_spend_flag) * 100.0 / 1000, 2)
-FROM customer_data_quality_exceptions
-
-UNION ALL
-
-SELECT 'Duplicate ID Records',
-       SUM(duplicate_id_flag),
-       ROUND(SUM(duplicate_id_flag) * 100.0 / 1000, 2)
-FROM customer_data_quality_exceptions;
+WHERE invalid_signup_date_flag = 1;
