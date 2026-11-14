@@ -101,8 +101,8 @@ The SQL-based audit identified the following data quality exceptions across 1,00
 | Unique Exception Records | 215 | 21.50% |
 | Missing Emails | 31 | 3.10% |
 | Invalid Signup Dates | 54 | 5.40% |
-| Invalid Spend Values | 62 | 6.20% |
-| Duplicate ID Records | 85 | 8.50% |
+| Spend Exceptions | 62 | 6.20% |
+| Records with Repeated Customer IDs | 85 | 8.50% |
 
 ### 7.2 Key Observations
 
@@ -175,19 +175,18 @@ These recommendations can help improve data reliability, reporting accuracy, and
 
 ## 10. SQL Script Execution Notes
 
-The SQL scripts are organized by project activity.
+The SQL scripts are organized by project activity:
 
-- File 01: Data profiling and exploratory analysis.
-- File 02: Data standardization and related validation.
-- File 03: Earlier validation version; not part of the final execution sequence.
-- File 04: Final customer data quality exception view.
-- File 05: Final consolidated audit summary.
+- **File 01:** Data profiling and exploratory analysis.
+- **File 02:** Data standardization and related validation.
+- **File 03:** Earlier validation queries retained for reference; not part of the final execution workflow.
+- **File 04:** Creates the final customer data-quality exception view.
+- **File 05:** Generates the final consolidated audit summary.
 
-Files 01 and 02 contain exploratory and database-modification
-statements. They should not be executed as complete scripts
-against an already populated database without checking the
-existing database objects first.
+### Execution Guidelines
 
-For the final audit workflow, File 04 defines the exception
-view and File 05 generates the consolidated audit summary.
-The source table must already exist.
+Files 01 and 02 contain exploratory queries and database-modification statements. They should not be executed as complete scripts against an already populated database without first checking the existing database objects.
+
+Files 04 and 05 form the final audit reporting workflow. They require the source and standardized database tables to be available before execution.
+
+Files 01–03 document the earlier development and validation process and should not be treated as a sequential execution script.
